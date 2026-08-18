@@ -171,7 +171,7 @@ local function checkInventoryForRarePets(savedata)
                         end
                         
                         if isRare then
-                            local uniqueKey = tostring(itemData.uid or itemData.UUID or (petName "_" tostring(itemData.amount or 1)))
+                            local uniqueKey = tostring(itemData.uid or itemData.UUID or (petName .. "_" .. tostring(itemData.amount or 1)))
                             currentInventoryPets[uniqueKey] = {Name = petName, Rarity = rarity}
                             
                             if not isFirstInventoryCheck and not knownPetsInventory[uniqueKey] then
