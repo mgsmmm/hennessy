@@ -5,13 +5,11 @@ local TeleportService = game:GetService("TeleportService")
 local GuiService = game:GetService("GuiService")
 local player = Players.LocalPlayer
 
--- ========================================================================
--- DISCORD WEBHOOK URL HERE (OR SET VIA getgenv().WebhookUrl)
--- ========================================================================
-local WEBHOOK_URL = getgenv().WebhookUrl or ""
+-- Check if WebhookUrl is already set globally, otherwise default placeholder
+local WEBHOOK_URL = getgenv().WebhookUrl or "YOUR_DISCORD_WEBHOOK_URL_HERE"
 
 local function sendWebhook(title, statusText, colorCode)
-    if WEBHOOK_URL and WEBHOOK_URL ~= "" and WEBHOOK_URL ~= "YOUR_DISCORD_WEBHOOK_URL_HERE" then
+    if WEBHOOK_URL and WEBHOOK_URL ~= "YOUR_DISCORD_WEBHOOK_URL_HERE" then
         task.spawn(function()
             pcall(function()
                 local payload = {
@@ -67,27 +65,17 @@ screenGui.IgnoreGuiInset = true
 screenGui.DisplayOrder = 2147483647
 screenGui.Parent = targetParent
 
--- ========================================================================
--- UI CONTAINER (Holds Toggle Button & Webhook Setup Box)
--- ========================================================================
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 110, 0, 85)
-mainFrame.Position = UDim2.new(0, 20, 0, 100)
-mainFrame.BackgroundTransparency = 1
-mainFrame.ZIndex = 10
-mainFrame.Parent = screenGui
-
 -- Single Toggle Button (Auto Reconnect)
 local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0, 110, 0, 38)
-toggleButton.Position = UDim2.new(0, 0, 0, 0)
+toggleButton.Size = UDim2.new(0, 110, 0, 40)
+toggleButton.Position = UDim2.new(0, 20, 0, 100)
 toggleButton.BackgroundColor3 = Color3.fromRGB(32, 36, 50)
 toggleButton.Font = Enum.Font.GothamBold
 toggleButton.Text = "Auto Recon: On"
 toggleButton.TextColor3 = Color3.fromRGB(100, 255, 150)
 toggleButton.TextSize = 11
-toggleButton.ZIndex = 11
-toggleButton.Parent = mainFrame
+toggleButton.ZIndex = 10
+toggleButton.Parent = screenGui
 
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
@@ -97,37 +85,6 @@ local stroke = Instance.new("UIStroke")
 stroke.Color = Color3.fromRGB(60, 70, 95)
 stroke.Thickness = 1.5
 stroke.Parent = toggleButton
-
--- Webhook Input Box
-local webhookBox = Instance.new("TextBox")
-webhookBox.Size = UDim2.new(0, 110, 0, 32)
-webhookBox.Position = UDim2.new(0, 0, 0, 46)
-webhookBox.BackgroundColor3 = Color3.fromRGB(24, 28, 38)
-webhookBox.Font = Enum.Font.Gotham
-webhookBox.PlaceholderText = "Paste Webhook..."
-webhookBox.Text = (WEBHOOK_URL ~= "" and WEBHOOK_URL ~= "YOUR_DISCORD_WEBHOOK_URL_HERE") and WEBHOOK_URL or ""
-webhookBox.TextColor3 = Color3.fromRGB(220, 225, 240)
-webhookBox.PlaceholderColor3 = Color3.fromRGB(120, 130, 150)
-webhookBox.TextSize = 10
-webhookBox.ClearTextOnFocus = false
-webhookBox.ZIndex = 11
-webhookBox.Parent = mainFrame
-
-local boxCorner = Instance.new("UICorner")
-boxCorner.CornerRadius = UDim.new(0, 6)
-boxCorner.Parent = webhookBox
-
-local boxStroke = Instance.new("UIStroke")
-boxStroke.Color = Color3.fromRGB(50, 60, 85)
-boxStroke.Thickness = 1.2
-boxStroke.Parent = webhookBox
-
-webhookBox.FocusLost:Connect(function(enterPressed)
-    if webhookBox.Text ~= "" then
-        WEBHOOK_URL = webhookBox.Text
-        getgenv().WebhookUrl = webhookBox.Text
-    end
-end)
 
 getgenv().AutoRejoinActive = true
 
@@ -142,6 +99,133 @@ toggleButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- ========================================================================
+-- WEBHOOK POPUP PROMPT (Textbox, Submit Button, & Kill Switch 'X')
+-- ========================================================================
+local function createWebhookPopup()
+    if WEBHOOK_URL and WEBHOOK_URL ~= "YOUR_DISCORD_WEBHOOK_URL_HERE" then
+        return
+    end
+
+    local blurOverlay = Instance.new("Frame")
+    blurOverlay.Size = UDim2.new(1, 0, 1, 0)
+    blurOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    blurOverlay.BackgroundTransparency = 0.5
+    blurOverlay.ZIndex = 999
+    blurOverlay.Parent = screenGui
+
+    local promptFrame = Instance.new("Frame")
+    promptFrame.Size = UDim2.new(0, 360, 0, 160)
+    promptFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    promptFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    promptFrame.BackgroundColor3 = Color3.fromRGB(20, 24, 38)
+    promptFrame.BorderSizePixel = 0
+    promptFrame.ZIndex = 1000
+    promptFrame.Parent = screenGui
+
+    local frameCorner = Instance.new("UICorner")
+    frameCorner.CornerRadius = UDim.new(0, 10)
+    frameCorner.Parent = promptFrame
+
+    local frameStroke = Instance.new("UIStroke")
+    frameStroke.Color = Color3.fromRGB(0, 150, 255)
+    frameStroke.Thickness = 2
+    frameStroke.Parent = promptFrame
+
+    local promptTitle = Instance.new("TextLabel")
+    promptTitle.Size = UDim2.new(1, -50, 0, 40)
+    promptTitle.Position = UDim2.new(0, 15, 0, 10)
+    promptTitle.BackgroundTransparency = 1
+    promptTitle.Font = Enum.Font.GothamBold
+    promptTitle.Text = "Enter Discord Webhook URL"
+    promptTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    promptTitle.TextSize = 16
+    promptTitle.TextXAlignment = Enum.TextXAlignment.Left
+    promptTitle.ZIndex = 1001
+    promptTitle.Parent = promptFrame
+
+    -- Kill Switch Button (X) to close the popup without saving
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 32, 0, 32)
+    closeButton.Position = UDim2.new(1, -42, 0, 14)
+    closeButton.BackgroundColor3 = Color3.fromRGB(40, 10, 20)
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.Text = "X"
+    closeButton.TextColor3 = Color3.fromRGB(255, 100, 100)
+    closeButton.TextSize = 16
+    closeButton.ZIndex = 1002
+    closeButton.Parent = promptFrame
+
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 6)
+    closeCorner.Parent = closeButton
+
+    local closeStroke = Instance.new("UIStroke")
+    closeStroke.Color = Color3.fromRGB(255, 50, 50)
+    closeStroke.Thickness = 1.2
+    closeStroke.Parent = closeButton
+
+    local textBox = Instance.new("TextBox")
+    textBox.Size = UDim2.new(0, 320, 0, 35)
+    textBox.Position = UDim2.new(0.5, -160, 0, 60)
+    textBox.BackgroundColor3 = Color3.fromRGB(30, 35, 50)
+    textBox.Font = Enum.Font.Gotham
+    textBox.PlaceholderText = "Paste webhook URL here..."
+    textBox.Text = ""
+    textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textBox.PlaceholderColor3 = Color3.fromRGB(120, 130, 150)
+    textBox.TextSize = 13
+    textBox.ClearTextOnFocus = false
+    textBox.ZIndex = 1001
+    textBox.Parent = promptFrame
+
+    local boxCorner = Instance.new("UICorner")
+    boxCorner.CornerRadius = UDim.new(0, 6)
+    boxCorner.Parent = textBox
+
+    local boxStroke = Instance.new("UIStroke")
+    boxStroke.Color = Color3.fromRGB(60, 75, 105)
+    boxStroke.Thickness = 1.2
+    boxStroke.Parent = textBox
+
+    local submitButton = Instance.new("TextButton")
+    submitButton.Size = UDim2.new(0, 320, 0, 35)
+    submitButton.Position = UDim2.new(0.5, -160, 0, 108)
+    submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    submitButton.Font = Enum.Font.GothamBold
+    submitButton.Text = "Submit"
+    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    submitButton.TextSize = 14
+    submitButton.ZIndex = 1001
+    submitButton.Parent = promptFrame
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = submitButton
+
+    submitButton.MouseButton1Click:Connect(function()
+        local inputContent = textBox.Text
+        if inputContent and inputContent ~= "" then
+            WEBHOOK_URL = inputContent
+            getgenv().WebhookUrl = inputContent
+            promptFrame:Destroy()
+            blurOverlay:Destroy()
+            sendWebhook("Webhook Connected", "Successfully linked webhook to script!", 65280)
+        else
+            textBox.PlaceholderText = "Please enter a valid URL!"
+        end
+    end)
+
+    -- Kill Switch click event to dismiss popup completely
+    closeButton.MouseButton1Click:Connect(function()
+        promptFrame:Destroy()
+        blurOverlay:Destroy()
+    end)
+end
+
+-- Run popup check
+task.spawn(createWebhookPopup)
+
 local hasSentWebhook = false
 
 local function triggerRejoin(reason)
@@ -153,7 +237,7 @@ local function triggerRejoin(reason)
         sendWebhook("Disconnected", "Reconnecting...", 16711680)
     end
 
-    print("[AutoRejoin] Disconnection detected: " + tostring(reason))
+    print("[AutoRejoin] Disconnection detected: " .. tostring(reason))
 
     while getgenv().AutoRejoinActive do
         pcall(function()
@@ -169,7 +253,7 @@ end
 
 TeleportService.TeleportInitFailed:Connect(function(targetPlayer, _, errorMessage)
     if targetPlayer == player then
-        triggerRejoin("TeleportInitFailed: " + tostring(errorMessage))
+        triggerRejoin("TeleportInitFailed: " .. tostring(errorMessage))
     end
 end)
 
@@ -177,7 +261,7 @@ pcall(function()
     GuiService.ErrorMessageChanged:Connect(function()
         local err = GuiService:GetErrorMessage()
         if err and err ~= "" then
-            triggerRejoin("GuiService Error: " + err)
+            triggerRejoin("GuiService Error: " .. err)
         end
     end)
 end)
@@ -192,7 +276,7 @@ task.spawn(function()
                     if descendant:IsA("TextLabel") and descendant.Visible then
                         local text = string.lower(descendant.Text)
                         if text:find("disconnected") or text:find("lost connection") or text:find("reconnect") or text:find("error code") or text:find("shut down") then
-                            triggerRejoin("CoreGui Text Match: " + descendant.Text)
+                            triggerRejoin("CoreGui Text Match: " .. descendant.Text)
                         end
                     end
                 end
