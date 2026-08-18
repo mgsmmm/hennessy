@@ -16,9 +16,9 @@ local player = Players.LocalPlayer
 -- ========================================================================
 local StatGUI = {
     Enable = true,
-    AutoReconnect = true, -- Automatically rejoin the exact same server when disconnected
-    WebhookUrl = getgenv().WebhookUrl or "YOUR_DISCORD_WEBHOOK_URL_HERE", -- Paste your Discord webhook link here
-    WebhookInterval = 3600, -- Interval in seconds (defaults to 3600 / 1 hour)
+    AutoReconnect = true,
+    WebhookUrl = getgenv().WebhookUrl or "",
+    WebhookInterval = 0, -- Default set to 0 (user sets it via popup)
     Items = {
         {Class = "Currency", Item = "Diamonds"},
         {Class = "Currency", Item = "FiestaOrbs"},
@@ -30,7 +30,6 @@ local StatGUI = {
 
 if not StatGUI.Enable then return end
 
--- Helper function to send webhooks safely
 local function sendRawWebhook(payload)
     if StatGUI.WebhookUrl and StatGUI.WebhookUrl ~= "" and StatGUI.WebhookUrl ~= "YOUR_DISCORD_WEBHOOK_URL_HERE" then
         pcall(function()
@@ -49,7 +48,7 @@ local function sendRawWebhook(payload)
 end
 
 -- ========================================================================
--- AUTO RECONNECT & DISCONNECTION DETECTION CORE (Anti-Spam Fixed)
+-- AUTO RECONNECT & DISCONNECTION DETECTION CORE
 -- ========================================================================
 if getgenv().StatGUI_Connections then
     for _, conn in ipairs(getgenv().StatGUI_Connections) do
@@ -117,7 +116,7 @@ end)
 table.insert(getgenv().StatGUI_Connections, conn2)
 
 -- ========================================================================
--- PET DROP / INVENTORY MONITORING (Huge, Titanic, Gargantuan)
+-- PET DROP / INVENTORY MONITORING
 -- ========================================================================
 local trackedPetRarities = {
     ["huge"] = true,
@@ -130,9 +129,9 @@ local isFirstInventoryCheck = true
 
 local function sendPetNotification(petName, petRarity)
     local colorMap = {
-        ["huge"] = 3447003,      -- Blue
-        ["titanic"] = 10181046,  -- Purple / Magenta
-        ["gargantuan"] = 16776960 -- Gold / Yellow
+        ["huge"] = 3447003,
+        ["titanic"] = 10181046,
+        ["gargantuan"] = 16776960
     }
     
     local payload = {
@@ -197,7 +196,7 @@ local function checkInventoryForRarePets(savedata)
 end
 
 -- ========================================================================
--- CORE-GUI INJECTION (Bypasses PlayerGui layer restrictions on mobile executors)
+-- CORE-GUI INJECTION
 -- ========================================================================
 local targetParent = player:WaitForChild("PlayerGui")
 pcall(function()
@@ -222,7 +221,7 @@ screenGui.IgnoreGuiInset = true
 screenGui.DisplayOrder = 2147483647
 screenGui.Parent = targetParent
 
--- Bulletproof Anti-AFK Setup
+-- Anti-AFK Setup
 local antiAfkActive = true
 
 local idleConn = player.Idled:Connect(function()
@@ -250,7 +249,6 @@ task.spawn(function()
     end
 end)
 
--- Solid Background Layer
 local solidBackground = Instance.new("Frame")
 solidBackground.Name = "SolidBackground"
 solidBackground.Size = UDim2.new(1, 0, 1, 0)
@@ -280,81 +278,130 @@ neonStroke.Color = Color3.fromRGB(70, 130, 255)
 neonStroke.Thickness = 2
 neonStroke.Parent = mainFrame
 
--- Webhook Setup Modal/Popup Frame (Appears automatically if no webhook is set)
-local modalOverlay = Instance.new("Frame")
-modalOverlay.Size = UDim2.new(1, 0, 1, 0)
-modalOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-modalOverlay.BackgroundTransparency = 0.5
-modalOverlay.Visible = (StatGUI.WebhookUrl == "" or StatGUI.WebhookUrl == "YOUR_DISCORD_WEBHOOK_URL_HERE")
-modalOverlay.ZIndex = 100
-modalOverlay.Parent = screenGui
+-- ========================================================================
+-- CONFIGURATION OVERLAY PANEL (Forced Visible & Centered on ScreenGui)
+-- ========================================================================
+local overlayPanel = Instance.new("Frame")
+overlayPanel.Name = "ConfigOverlayPanel"
+overlayPanel.Size = UDim2.new(0, 340, 0, 210)
+overlayPanel.AnchorPoint = Vector2.new(0.5, 0.5)
+overlayPanel.Position = UDim2.new(0.5, 0, 0.5, 0)
+overlayPanel.BackgroundColor3 = Color3.fromRGB(18, 22, 30)
+overlayPanel.Visible = true -- Forcefully visible on launch so you can set it!
+overlayPanel.ZIndex = 99999 -- Maximum possible layer
+overlayPanel.Parent = screenGui
 
-local modalFrame = Instance.new("Frame")
-modalFrame.Size = UDim2.new(0, 300, 0, 150)
-modalFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
-modalFrame.BackgroundColor3 = Color3.fromRGB(24, 28, 38)
-modalFrame.ZIndex = 101
-modalFrame.Parent = modalOverlay
+local overlayCorner = Instance.new("UICorner")
+overlayCorner.CornerRadius = UDim.new(0, 12)
+overlayCorner.Parent = overlayPanel
 
-local modalCorner = Instance.new("UICorner")
-modalCorner.CornerRadius = UDim.new(0, 10)
-modalCorner.Parent = modalFrame
+local overlayStroke = Instance.new("UIStroke")
+overlayStroke.Color = Color3.fromRGB(100, 160, 255)
+overlayStroke.Thickness = 2.5
+overlayStroke.Parent = overlayPanel
 
-local modalStroke = Instance.new("UIStroke")
-modalStroke.Color = Color3.fromRGB(60, 70, 95)
-modalStroke.Thickness = 1.5
-modalStroke.Parent = modalFrame
+local overlayTitle = Instance.new("TextLabel")
+overlayTitle.Size = UDim2.new(1, 0, 0, 35)
+overlayTitle.BackgroundTransparency = 1
+overlayTitle.Font = Enum.Font.GothamBold
+overlayTitle.Text = "⚙️ Setup Webhook & Interval"
+overlayTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+overlayTitle.TextSize = 14
+overlayTitle.ZIndex = 100000
+overlayTitle.Parent = overlayPanel
 
-local modalTitle = Instance.new("TextLabel")
-modalTitle.Size = UDim2.new(1, 0, 0, 35)
-modalTitle.BackgroundTransparency = 1
-modalTitle.Font = Enum.Font.GothamBold
-modalTitle.Text = "Enter Discord Webhook URL"
-modalTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-modalTitle.TextSize = 13
-modalTitle.ZIndex = 102
-modalTitle.Parent = modalFrame
-
+-- Webhook Input Box
 local webhookBox = Instance.new("TextBox")
-webhookBox.Size = UDim2.new(0, 260, 0, 35)
-webhookBox.Position = UDim2.new(0.5, -130, 0, 45)
-webhookBox.BackgroundColor3 = Color3.fromRGB(35, 40, 55)
+webhookBox.Size = UDim2.new(0, 300, 0, 34)
+webhookBox.Position = UDim2.new(0.5, -150, 0, 42)
+webhookBox.BackgroundColor3 = Color3.fromRGB(30, 35, 48)
 webhookBox.Font = Enum.Font.Gotham
-webhookBox.PlaceholderText = "Paste Webhook URL here..."
+webhookBox.PlaceholderText = "Paste Discord Webhook URL here..."
 webhookBox.Text = ""
-webhookBox.TextColor3 = Color3.fromRGB(220, 225, 240)
-webhookBox.PlaceholderColor3 = Color3.fromRGB(120, 130, 150)
+webhookBox.TextColor3 = Color3.fromRGB(240, 245, 255)
+webhookBox.PlaceholderColor3 = Color3.fromRGB(140, 150, 170)
 webhookBox.TextSize = 11
 webhookBox.ClearTextOnFocus = false
-webhookBox.ZIndex = 102
-webhookBox.Parent = modalFrame
+webhookBox.ZIndex = 100000
+webhookBox.Parent = overlayPanel
 
 local boxCorner = Instance.new("UICorner")
 boxCorner.CornerRadius = UDim.new(0, 6)
 boxCorner.Parent = webhookBox
 
+local boxStroke = Instance.new("UIStroke")
+boxStroke.Color = Color3.fromRGB(70, 90, 130)
+boxStroke.Thickness = 1
+boxStroke.Parent = webhookBox
+
+-- Interval Label
+local intervalLabel = Instance.new("TextLabel")
+intervalLabel.Size = UDim2.new(0, 300, 0, 18)
+intervalLabel.Position = UDim2.new(0.5, -150, 0, 82)
+intervalLabel.BackgroundTransparency = 1
+intervalLabel.Font = Enum.Font.GothamMedium
+intervalLabel.Text = "Notifier Interval (Seconds, 0 = Off):"
+intervalLabel.TextColor3 = Color3.fromRGB(200, 210, 230)
+intervalLabel.TextSize = 11
+intervalLabel.TextXAlignment = Enum.TextXAlignment.Left
+intervalLabel.ZIndex = 100000
+intervalLabel.Parent = overlayPanel
+
+-- Interval Input Box (No default time value, starts blank)
+local intervalBox = Instance.new("TextBox")
+intervalBox.Size = UDim2.new(0, 300, 0, 34)
+intervalBox.Position = UDim2.new(0.5, -150, 0, 102)
+intervalBox.BackgroundColor3 = Color3.fromRGB(30, 35, 48)
+intervalBox.Font = Enum.Font.Gotham
+intervalBox.PlaceholderText = "Seconds (e.g. 3600 or 0 to disable)"
+intervalBox.Text = ""
+intervalBox.TextColor3 = Color3.fromRGB(240, 245, 255)
+intervalBox.PlaceholderColor3 = Color3.fromRGB(140, 150, 170)
+intervalBox.TextSize = 11
+intervalBox.ClearTextOnFocus = false
+intervalBox.ZIndex = 100000
+intervalBox.Parent = overlayPanel
+
+local intervalCorner = Instance.new("UICorner")
+intervalCorner.CornerRadius = UDim.new(0, 6)
+intervalCorner.Parent = intervalBox
+
+local intervalStroke = Instance.new("UIStroke")
+intervalStroke.Color = Color3.fromRGB(70, 90, 130)
+intervalStroke.Thickness = 1
+intervalStroke.Parent = intervalBox
+
+-- Submit Button
 local submitButton = Instance.new("TextButton")
-submitButton.Size = UDim2.new(0, 260, 0, 35)
-submitButton.Position = UDim2.new(0.5, -130, 0, 95)
-submitButton.BackgroundColor3 = Color3.fromRGB(60, 130, 246)
+submitButton.Size = UDim2.new(0, 300, 0, 38)
+submitButton.Position = UDim2.new(0.5, -150, 0, 148)
+submitButton.BackgroundColor3 = Color3.fromRGB(50, 130, 246)
 submitButton.Font = Enum.Font.GothamBold
-submitButton.Text = "Submit & Close"
+submitButton.Text = "Save & Open Main GUI"
 submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 submitButton.TextSize = 12
-submitButton.ZIndex = 102
-submitButton.Parent = modalFrame
+submitButton.ZIndex = 100000
+submitButton.Parent = overlayPanel
 
 local btnCorner = Instance.new("UICorner")
 btnCorner.CornerRadius = UDim.new(0, 6)
 btnCorner.Parent = submitButton
 
 submitButton.MouseButton1Click:Connect(function()
-    local text = webhookBox.Text
-    if text and text ~= "" then
-        StatGUI.WebhookUrl = text
-        getgenv().WebhookUrl = text
-        modalOverlay.Visible = false
+    local urlText = webhookBox.Text
+    if urlText and urlText ~= "" then
+        StatGUI.WebhookUrl = urlText
+        getgenv().WebhookUrl = urlText
     end
+    
+    local intervalVal = tonumber(intervalBox.Text)
+    if intervalVal then
+        StatGUI.WebhookInterval = intervalVal
+    else
+        StatGUI.WebhookInterval = 0
+    end
+    
+    overlayPanel.Visible = false
 end)
 
 -- Title
@@ -417,30 +464,30 @@ killStroke.Color = Color3.fromRGB(100, 110, 130)
 killStroke.Thickness = 1
 killStroke.Parent = killButton
 
--- Background Mode Toggle Button
-local bgModes = {"None", "Cyan", "White", "Black"}
-local bgModeLabels = {"Background: None (default)", "Background: cyan", "Background: white", "Background: black"}
-local currentModeIndex = 1
-
-local bgModeButton = Instance.new("TextButton")
-bgModeButton.Size = UDim2.new(0, 185, 0, 32)
-bgModeButton.Position = UDim2.new(1, -231, 0, 9)
-bgModeButton.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
-bgModeButton.Font = Enum.Font.GothamBold
-bgModeButton.Text = bgModeLabels[currentModeIndex]
-bgModeButton.TextColor3 = Color3.fromRGB(200, 220, 255)
-bgModeButton.TextSize = 10
-bgModeButton.ZIndex = 3
-bgModeButton.Parent = mainFrame
+-- Button to manually open the configuration overlay anytime
+local configOpenButton = Instance.new("TextButton")
+configOpenButton.Size = UDim2.new(0, 185, 0, 32)
+configOpenButton.Position = UDim2.new(1, -231, 0, 9)
+configOpenButton.BackgroundColor3 = Color3.fromRGB(45, 50, 65)
+configOpenButton.Font = Enum.Font.GothamBold
+configOpenButton.Text = "⚙️ Config Webhook"
+configOpenButton.TextColor3 = Color3.fromRGB(200, 220, 255)
+configOpenButton.TextSize = 10
+configOpenButton.ZIndex = 3
+configOpenButton.Parent = mainFrame
 
 local bgCorner = Instance.new("UICorner")
 bgCorner.CornerRadius = UDim.new(0, 6)
-bgCorner.Parent = bgModeButton
+bgCorner.Parent = configOpenButton
 
 local bgModeStroke = Instance.new("UIStroke")
 bgModeStroke.Color = Color3.fromRGB(100, 110, 130)
 bgModeStroke.Thickness = 1
-bgModeStroke.Parent = bgModeButton
+bgModeStroke.Parent = configOpenButton
+
+configOpenButton.MouseButton1Click:Connect(function()
+    overlayPanel.Visible = true
+end)
 
 -- ========================================================================
 -- LEFT SIDE CONTROL PANEL
@@ -554,7 +601,6 @@ uiList.SortOrder = Enum.SortOrder.LayoutOrder
 uiList.Padding = UDim.new(0, 3)
 uiList.Parent = contentHolder
 
--- Popup Notification for Webhook Sent
 local function showWebhookSentNotification()
     pcall(function()
         local notif = Instance.new("TextLabel")
@@ -586,7 +632,6 @@ local function showWebhookSentNotification()
     end)
 end
 
--- Function to trigger Webhook manually
 local valueLabels = {}
 local function sendWebhookNotification(isTest)
     if StatGUI.WebhookUrl and StatGUI.WebhookUrl ~= "" and StatGUI.WebhookUrl ~= "YOUR_DISCORD_WEBHOOK_URL_HERE" then
@@ -620,7 +665,7 @@ local function sendWebhookNotification(isTest)
 end
 
 -- ========================================================================
--- ADVANCED MAXIMUM GREY-OUT FPS BOOSTER
+-- FPS BOOSTER
 -- ========================================================================
 fpsButton.MouseButton1Click:Connect(function()
     pcall(function()
@@ -687,24 +732,16 @@ fpsButton.MouseButton1Click:Connect(function()
             end)
         end)
 
-        pcall(function()
-            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-            settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
-            UserSettings().GameSettings.SavedQualityLevel = Enum.SavedQualityLevel.Level1
-        end)
-
         fpsButton.TextColor3 = Color3.fromRGB(100, 255, 150)
         fpsButton.Text = "optimized"
     end)
 end)
 
--- Test Webhook Click Event
 testWebhookButton.MouseButton1Click:Connect(function()
     sendWebhookNotification(true)
     showWebhookSentNotification()
 end)
 
--- Anti-AFK Simple Toggle Click Event (On / Off)
 antiAfkButton.MouseButton1Click:Connect(function()
     antiAfkActive = not antiAfkActive
     if antiAfkActive then
@@ -716,7 +753,6 @@ antiAfkButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Auto Reconnect Toggle Click Event
 autoReconnectButton.MouseButton1Click:Connect(function()
     StatGUI.AutoReconnect = not StatGUI.AutoReconnect
     if StatGUI.AutoReconnect then
@@ -728,37 +764,11 @@ autoReconnectButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Background mode toggle logic
-bgModeButton.MouseButton1Click:Connect(function()
-    currentModeIndex = currentModeIndex + 1
-    if currentModeIndex > #bgModes then
-        currentModeIndex = 1
-    end
-    
-    local mode = bgModes[currentModeIndex]
-    bgModeButton.Text = bgModeLabels[currentModeIndex]
-    
-    if mode == "None" then
-        solidBackground.Visible = false
-    elseif mode == "Cyan" then
-        solidBackground.BackgroundColor3 = Color3.fromRGB(0, 220, 255)
-        solidBackground.Visible = true
-    elseif mode == "White" then
-        solidBackground.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        solidBackground.Visible = true
-    elseif mode == "Black" then
-        solidBackground.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        solidBackground.Visible = true
-    end
-end)
-
--- Kill Switch Logic
 killButton.MouseButton1Click:Connect(function()
     antiAfkActive = false
     screenGui:Destroy()
 end)
 
--- Create List Rows inside the Stats Box
 for index, entry in ipairs(StatGUI.Items) do
     local itemRow = Instance.new("Frame")
     itemRow.Size = UDim2.new(1, 0, 0, 32)
@@ -897,15 +907,20 @@ local function getStatValue(itemName)
     return val
 end
 
--- Discord Webhook Interval Notification Loop
+-- Discord Webhook Interval Notification Loop (Only runs if interval > 0)
 task.spawn(function()
     while screenGui.Parent do
-        task.wait(StatGUI.WebhookInterval)
-        sendWebhookNotification(false)
+        task.wait(1)
+        local interval = StatGUI.WebhookInterval or 0
+        if interval > 0 then
+            task.wait(interval - 1)
+            if screenGui.Parent and (StatGUI.WebhookInterval or 0) > 0 then
+                sendWebhookNotification(false)
+            end
+        end
     end
 end)
 
--- Update Loop
 task.spawn(function()
     while screenGui.Parent and task.wait(0.5) do
         for _, pair in ipairs(valueLabels) do
