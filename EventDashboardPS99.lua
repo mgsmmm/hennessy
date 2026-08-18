@@ -11,12 +11,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local player = Players.LocalPlayer
 
+-- ========================================================================
+-- [EDIT HERE]: CONFIGURATION & ITEMS TO TRACK
+-- ========================================================================
 local StatGUI = {
     Enable = true,
-    AutoReconnect = true,
-    WebhookUrl = getgenv().WebhookUrl or "YOUR_DISCORD_WEBHOOK_URL_HERE",
-    WebhookInterval = 3600,
-    WebhookEnabled = true,
+    AutoReconnect = true, -- Automatically rejoin the exact same server when disconnected
+    WebhookUrl = getgenv().WebhookUrl or "YOUR_DISCORD_WEBHOOK_URL_HERE", -- Paste your Discord webhook link here
+    WebhookInterval = 3600, -- Interval in seconds (defaults to 3600 / 1 hour)
     Items = {
         {Class = "Currency", Item = "Diamonds"},
         {Class = "Currency", Item = "FiestaOrbs"},
@@ -28,8 +30,8 @@ local StatGUI = {
 
 if not StatGUI.Enable then return end
 
+-- Helper function to send webhooks safely
 local function sendRawWebhook(payload)
-    if not StatGUI.WebhookEnabled then return end
     if StatGUI.WebhookUrl and StatGUI.WebhookUrl ~= "" and StatGUI.WebhookUrl ~= "YOUR_DISCORD_WEBHOOK_URL_HERE" then
         pcall(function()
             local encodedData = HttpService:JSONEncode(payload)
@@ -46,6 +48,9 @@ local function sendRawWebhook(payload)
     end
 end
 
+-- ========================================================================
+-- AUTO RECONNECT & DISCONNECTION DETECTION CORE (Anti-Spam Fixed)
+-- ========================================================================
 if getgenv().StatGUI_Connections then
     for _, conn in ipairs(getgenv().StatGUI_Connections) do
         if typeof(conn) == "RBXScriptConnection" then
@@ -111,6 +116,9 @@ local conn2 = Players.PlayerRemoving:Connect(function(leavingPlayer)
 end)
 table.insert(getgenv().StatGUI_Connections, conn2)
 
+-- ========================================================================
+-- PET DROP / INVENTORY MONITORING (Huge, Titanic, Gargantuan)
+-- ========================================================================
 local trackedPetRarities = {
     ["huge"] = true,
     ["titanic"] = true,
@@ -122,9 +130,9 @@ local isFirstInventoryCheck = true
 
 local function sendPetNotification(petName, petRarity)
     local colorMap = {
-        ["huge"] = 3447003,
-        ["titanic"] = 10181046,
-        ["gargantuan"] = 16776960
+        ["huge"] = 3447003,      -- Blue
+        ["titanic"] = 10181046,  -- Purple / Magenta
+        ["gargantuan"] = 16776960 -- Gold / Yellow
     }
     
     local payload = {
@@ -188,6 +196,9 @@ local function checkInventoryForRarePets(savedata)
     isFirstInventoryCheck = false
 end
 
+-- ========================================================================
+-- CORE-GUI INJECTION (Bypasses PlayerGui layer restrictions on mobile executors)
+-- ========================================================================
 local targetParent = player:WaitForChild("PlayerGui")
 pcall(function()
     if syn and syn.protect_gui then
@@ -211,6 +222,7 @@ screenGui.IgnoreGuiInset = true
 screenGui.DisplayOrder = 2147483647
 screenGui.Parent = targetParent
 
+-- Bulletproof Anti-AFK Setup
 local antiAfkActive = true
 
 local idleConn = player.Idled:Connect(function()
@@ -238,6 +250,7 @@ task.spawn(function()
     end
 end)
 
+-- Solid Background Layer
 local solidBackground = Instance.new("Frame")
 solidBackground.Name = "SolidBackground"
 solidBackground.Size = UDim2.new(1, 0, 1, 0)
@@ -247,9 +260,10 @@ solidBackground.ZIndex = 0
 solidBackground.Visible = false
 solidBackground.Parent = screenGui
 
+-- Main UI Window
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 520, 0, 365)
+mainFrame.Size = UDim2.new(0, 520, 0, 330)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.BackgroundColor3 = Color3.fromRGB(22, 25, 35)
@@ -266,6 +280,7 @@ neonStroke.Color = Color3.fromRGB(70, 130, 255)
 neonStroke.Thickness = 2
 neonStroke.Parent = mainFrame
 
+-- Webhook Setup Modal/Popup Frame (Appears automatically if no webhook is set)
 local modalOverlay = Instance.new("Frame")
 modalOverlay.Size = UDim2.new(1, 0, 1, 0)
 modalOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -342,6 +357,7 @@ submitButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Title
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(0, 138, 0, 22)
 titleLabel.Position = UDim2.new(0, 10, 0, 10)
@@ -354,6 +370,7 @@ titleLabel.TextXAlignment = Enum.TextXAlignment.Center
 titleLabel.ZIndex = 3
 titleLabel.Parent = mainFrame
 
+-- Avatar Image
 local avatarImage = Instance.new("ImageLabel")
 avatarImage.Size = UDim2.new(0, 44, 0, 44)
 avatarImage.Position = UDim2.new(0, 57, 0, 36)
@@ -366,6 +383,7 @@ local avatarCorner = Instance.new("UICorner")
 avatarCorner.CornerRadius = UDim.new(1, 0)
 avatarCorner.Parent = avatarImage
 
+-- Username Label
 local usernameLabel = Instance.new("TextLabel")
 usernameLabel.Size = UDim2.new(0, 138, 0, 18)
 usernameLabel.Position = UDim2.new(0, 10, 0, 83)
@@ -378,6 +396,7 @@ usernameLabel.TextXAlignment = Enum.TextXAlignment.Center
 usernameLabel.ZIndex = 3
 usernameLabel.Parent = mainFrame
 
+-- Kill Switch Button (X) - Top Right
 local killButton = Instance.new("TextButton")
 killButton.Size = UDim2.new(0, 32, 0, 32)
 killButton.Position = UDim2.new(1, -40, 0, 9)
@@ -398,6 +417,7 @@ killStroke.Color = Color3.fromRGB(100, 110, 130)
 killStroke.Thickness = 1
 killStroke.Parent = killButton
 
+-- Background Mode Toggle Button
 local bgModes = {"None", "Cyan", "White", "Black"}
 local bgModeLabels = {"Background: None (default)", "Background: cyan", "Background: white", "Background: black"}
 local currentModeIndex = 1
@@ -422,6 +442,9 @@ bgModeStroke.Color = Color3.fromRGB(100, 110, 130)
 bgModeStroke.Thickness = 1
 bgModeStroke.Parent = bgModeButton
 
+-- ========================================================================
+-- LEFT SIDE CONTROL PANEL
+-- ========================================================================
 local leftPanel = Instance.new("Frame")
 leftPanel.Size = UDim2.new(0, 138, 1, -112)
 leftPanel.Position = UDim2.new(0, 10, 0, 104)
@@ -445,6 +468,7 @@ local function styleButton(btn)
     stroke.Parent = btn
 end
 
+-- 1. Anti AFK Toggle Button
 local antiAfkButton = Instance.new("TextButton")
 antiAfkButton.Size = UDim2.new(1, 0, 0, 32)
 antiAfkButton.BackgroundColor3 = Color3.fromRGB(32, 36, 50)
@@ -457,6 +481,7 @@ antiAfkButton.ZIndex = 3
 antiAfkButton.Parent = leftPanel
 styleButton(antiAfkButton)
 
+-- 2. Auto Reconnect Toggle Button
 local autoReconnectButton = Instance.new("TextButton")
 autoReconnectButton.Size = UDim2.new(1, 0, 0, 32)
 autoReconnectButton.BackgroundColor3 = Color3.fromRGB(32, 36, 50)
@@ -469,18 +494,7 @@ autoReconnectButton.ZIndex = 3
 autoReconnectButton.Parent = leftPanel
 styleButton(autoReconnectButton)
 
-local webhookKillButton = Instance.new("TextButton")
-webhookKillButton.Size = UDim2.new(1, 0, 0, 32)
-webhookKillButton.BackgroundColor3 = Color3.fromRGB(32, 36, 50)
-webhookKillButton.Font = Enum.Font.GothamBold
-webhookKillButton.Text = "Webhook: On"
-webhookKillButton.TextColor3 = Color3.fromRGB(100, 255, 150)
-webhookKillButton.TextSize = 10
-webhookKillButton.LayoutOrder = 3
-webhookKillButton.ZIndex = 3
-webhookKillButton.Parent = leftPanel
-styleButton(webhookKillButton)
-
+-- 3. TEST Webhook Button
 local testWebhookButton = Instance.new("TextButton")
 testWebhookButton.Size = UDim2.new(1, 0, 0, 32)
 testWebhookButton.BackgroundColor3 = Color3.fromRGB(25, 55, 45)
@@ -488,12 +502,13 @@ testWebhookButton.Font = Enum.Font.GothamBold
 testWebhookButton.Text = "Webhook Test"
 testWebhookButton.TextColor3 = Color3.fromRGB(100, 255, 200)
 testWebhookButton.TextSize = 10
-testWebhookButton.LayoutOrder = 4
+testWebhookButton.LayoutOrder = 3
 testWebhookButton.ZIndex = 3
 testWebhookButton.Parent = leftPanel
 styleButton(testWebhookButton)
 testWebhookButton:FindFirstChildOfClass("UIStroke").Color = Color3.fromRGB(40, 160, 100)
 
+-- 4. FPS Booster Button
 local fpsButton = Instance.new("TextButton")
 fpsButton.Size = UDim2.new(1, 0, 0, 32)
 fpsButton.BackgroundColor3 = Color3.fromRGB(55, 40, 20)
@@ -501,12 +516,15 @@ fpsButton.Font = Enum.Font.GothamBold
 fpsButton.Text = "FPS Booster"
 fpsButton.TextColor3 = Color3.fromRGB(255, 200, 100)
 fpsButton.TextSize = 11
-fpsButton.LayoutOrder = 5
+fpsButton.LayoutOrder = 4
 fpsButton.ZIndex = 3
 fpsButton.Parent = leftPanel
 styleButton(fpsButton)
 fpsButton:FindFirstChildOfClass("UIStroke").Color = Color3.fromRGB(180, 120, 40)
 
+-- ========================================================================
+-- RIGHT SIDE STATS BOX CONTAINER
+-- ========================================================================
 local statsBox = Instance.new("Frame")
 statsBox.Size = UDim2.new(1, -165, 1, -55)
 statsBox.Position = UDim2.new(0, 158, 0, 48)
@@ -536,6 +554,7 @@ uiList.SortOrder = Enum.SortOrder.LayoutOrder
 uiList.Padding = UDim.new(0, 3)
 uiList.Parent = contentHolder
 
+-- Popup Notification for Webhook Sent
 local function showWebhookSentNotification()
     pcall(function()
         local notif = Instance.new("TextLabel")
@@ -567,9 +586,9 @@ local function showWebhookSentNotification()
     end)
 end
 
+-- Function to trigger Webhook manually
 local valueLabels = {}
 local function sendWebhookNotification(isTest)
-    if not StatGUI.WebhookEnabled then return end
     if StatGUI.WebhookUrl and StatGUI.WebhookUrl ~= "" and StatGUI.WebhookUrl ~= "YOUR_DISCORD_WEBHOOK_URL_HERE" then
         pcall(function()
             local fields = {}
@@ -600,6 +619,9 @@ local function sendWebhookNotification(isTest)
     end
 end
 
+-- ========================================================================
+-- ADVANCED MAXIMUM GREY-OUT FPS BOOSTER
+-- ========================================================================
 fpsButton.MouseButton1Click:Connect(function()
     pcall(function()
         for _, v in ipairs(Lighting:GetChildren()) do
@@ -676,23 +698,13 @@ fpsButton.MouseButton1Click:Connect(function()
     end)
 end)
 
-webhookKillButton.MouseButton1Click:Connect(function()
-    StatGUI.WebhookEnabled = not StatGUI.WebhookEnabled
-    if StatGUI.WebhookEnabled then
-        webhookKillButton.Text = "Webhook: On"
-        webhookKillButton.TextColor3 = Color3.fromRGB(100, 255, 150)
-    else
-        webhookKillButton.Text = "Webhook: Off"
-        webhookKillButton.TextColor3 = Color3.fromRGB(255, 100, 150)
-    end
-end)
-
+-- Test Webhook Click Event
 testWebhookButton.MouseButton1Click:Connect(function()
-    if not StatGUI.WebhookEnabled then return end
     sendWebhookNotification(true)
     showWebhookSentNotification()
 end)
 
+-- Anti-AFK Simple Toggle Click Event (On / Off)
 antiAfkButton.MouseButton1Click:Connect(function()
     antiAfkActive = not antiAfkActive
     if antiAfkActive then
@@ -704,6 +716,7 @@ antiAfkButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Auto Reconnect Toggle Click Event
 autoReconnectButton.MouseButton1Click:Connect(function()
     StatGUI.AutoReconnect = not StatGUI.AutoReconnect
     if StatGUI.AutoReconnect then
@@ -715,6 +728,7 @@ autoReconnectButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Background mode toggle logic
 bgModeButton.MouseButton1Click:Connect(function()
     currentModeIndex = currentModeIndex + 1
     if currentModeIndex > #bgModes then
@@ -738,11 +752,13 @@ bgModeButton.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Kill Switch Logic
 killButton.MouseButton1Click:Connect(function()
     antiAfkActive = false
     screenGui:Destroy()
 end)
 
+-- Create List Rows inside the Stats Box
 for index, entry in ipairs(StatGUI.Items) do
     local itemRow = Instance.new("Frame")
     itemRow.Size = UDim2.new(1, 0, 0, 32)
@@ -881,6 +897,7 @@ local function getStatValue(itemName)
     return val
 end
 
+-- Discord Webhook Interval Notification Loop
 task.spawn(function()
     while screenGui.Parent do
         task.wait(StatGUI.WebhookInterval)
@@ -888,6 +905,7 @@ task.spawn(function()
     end
 end)
 
+-- Update Loop
 task.spawn(function()
     while screenGui.Parent and task.wait(0.5) do
         for _, pair in ipairs(valueLabels) do
