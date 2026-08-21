@@ -55,7 +55,6 @@ title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
--- Close (X) Button (Moved to the corner since minimize is gone)
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 28, 0, 26)
 closeBtn.Position = UDim2.new(1, -34, 0, 4)
@@ -197,40 +196,37 @@ end
 
 -- KEYS HERE 
 local validKeys = {
-    ["ADMIN1"] = "Codenameq94",
-    ["ADMIN2"] = "robloxthat01",
-    ["ADMIN3"] = "robloxthatzero",
-    ["ADMIN4"] = "Robloxthatzero1",
-    ["4mP9qR2xL7nT1yK"] = "stashlyseeds1",
-    ["7hF2wQ8kJ3dN6bX"] = "stashlyseeds2",
-    ["9pL1vC4zH5mR8fY"] = "stashlyseeds3",
-    ["2kX6nB9sD3tW1jQ"] = "stashlyseeds4",
-    ["5cV8mZ2xP7fY4hK"] = "stashlyseeds5",
-    ["1jN3bV6cX9lQ2wR"] = "stashlyseeds6",
-    ["8tH5kL1zM4pR7dF"] = "stashlyseeds7",
-    ["3wY7jX2cN6vB9sP"] = "stashlyseeds8",
-    ["6qM4fR8tD1hK3zJ"] = "stashlyseeds9",
-    ["0sX2vN5bL7mQ9wK"] = "stashlyseeds10",
-    ["4pC1zH3xR6fY8tD"] = "stashlyseeds11",
-    ["7jB9mL2kW4vQ6nP"] = "stashlyseeds12",
-    ["2hF5dX8cM1tZ3sJ"] = "stashlyseeds13",
-    ["9qW3vL6pR8fY1xK"] = "stashlyseeds14",
-    ["1mX7nB4zD2hQ5wJ"] = "stashlyseeds15",
-    ["6kC2sH9xL3tP8fR"] = "stashlyseeds16",
-    ["5jV8zM1qW4fY7dX"] = "stashlyseeds17",
-    ["3pL6bN2cR9mK1wT"] = "stashlyseeds18",
-    ["8hX4vF7jD1sQ3zM"] = "stashlyseeds19",
-    ["0wY1zC5xL8pR2nK"] = "stashlyseeds20",
-    ["4mB9qH3tM6fV7jP"] = "stashlyseeds21",
-    ["7sN2dL8cX1wK4zQ"] = "stashlyseeds22",
-    ["2pK5xV1mR3fY9hJ"] = "stashlyseeds23",
-    ["9jW6bC4zL7tQ8wX"] = "stashlyseeds24",
-    ["1hF3nL8pR2mK5dD"] = "stashlyseeds25",
-    ["6tX9zM2qW5fY1vK"] = "stashlyseeds26",
-    ["4qC7vB1xH3sP6jR"] = "stashlyseeds27",
-    ["8pL2zN5dL8mQ9wT"] = "stashlyseeds28",
-    ["3jK6xH9cR1fY4tM"] = "stashlyseeds29",
-    ["5wV1mB3qW7pK8zJ"] = "stashlyseeds30",
+    ["ADMIN"] = {"Codenameq94","robloxthat01","robloxthatzero", "Robloxthatzero1"},
+    ["4mP9qR2xL7nT1yK"] = {"stashlyseeds1", "stashlyseeds2", "stashlyseeds3", "stashlyseeds4", "stashlyseeds5", "stashlyseeds6", "stashlyseeds7", "stashlyseeds8", "stashlyseeds9", "stashlyseeds10", "stashlyseeds11", "stashlyseeds12", "stashlyseeds13", "stashlyseeds14", "stashlyseeds15", "stashlyseeds16", "stashlyseeds17", "stashlyseeds18", "stashlyseeds19", "stashlyseeds20", "stashlyseeds21", "stashlyseeds22", "stashlyseeds23", "stashlyseeds24", "stashlyseeds25", "stashlyseeds26", "stashlyseeds27", "stashlyseeds28", "stashlyseeds29", "stashlyseeds30"},
+    ["7hF2wQ8kJ3dN6bX"] = "user2",
+	["9pL1vC4zH5mR8fY"] = "user3",
+	["2kX6nB9sD3tW1jQ"] = "user4",
+	["5cV8mZ2xP7fY4hK"] = "user5",
+	["1jN3bV6cX9lQ2wR"] = "user6",
+	["8tH5kL1zM4pR7dF"] = "user7",
+	["3wY7jX2cN6vB9sP"] = "user8",
+	["6qM4fR8tD1hK3zJ"] = "user9",
+	["0sX2vN5bL7mQ9wK"] = "user10",
+	["4pC1zH3xR6fY8tD"] = "user11",
+	["7jB9mL2kW4vQ6nP"] = "user12",
+	["2hF5dX8cM1tZ3sJ"] = "user13",
+	["9qW3vL6pR8fY1xK"] = "user14",
+	["1mX7nB4zD2hQ5wJ"] = "user15",
+	["6kC2sH9xL3tP8fR"] = "user16",
+	["5jV8zM1qW4fY7dX"] = "user17",
+	["3pL6bN2cR9mK1wT"] = "user18",
+	["8hX4vF7jD1sQ3zM"] = "user19",
+	["0wY1zC5xL8pR2nK"] = "user20",
+	["4mB9qH3tM6fV7jP"] = "user21",
+	["7sN2dL8cX1wK4zQ"] = "user22",
+	["2pK5xV1mR3fY9hJ"] = "user23",
+	["9jW6bC4zL7tQ8wX"] = "user24",
+	["1hF3nL8pR2mK5dD"] = "user25",
+	["6tX9zM2qW5fY1vK"] = "user26",
+	["4qC7vB1xH3sP6jR"] = "user27",
+	["8pL2zN5dL8mQ9wT"] = "user28",
+	["3jK6xH9cR1fY4tM"] = "user29",
+	["5wV1mB3qW7pK8zJ"] = "user30",
     ["2sN4dL7xL2hQ9vX"] = "user31",
     ["7hX8vF1zM5pR3jK"] = "user32",
     ["0mY3bC6cX9tW2sP"] = "user33",
@@ -520,14 +516,29 @@ verifyBtn.MouseButton1Click:Connect(function()
     end
 
     if validKeys[enteredKey] then
-        local whitelistedUser = validKeys[enteredKey]:lower()
+        local allowedUsers = validKeys[enteredKey]
+        local isAllowed = false
 
-        if whitelistedUser == actualUsername then
+        -- Check if it's a list (table) or a single string
+        if type(allowedUsers) == "table" then
+            for _, username in ipairs(allowedUsers) do
+                if username:lower() == actualUsername then
+                    isAllowed = true
+                    break
+                end
+            end
+        elseif type(allowedUsers) == "string" then
+            if allowedUsers:lower() == actualUsername then
+                isAllowed = true
+            end
+        end
+
+        if isAllowed then
             triggerPopup("Access Granted!\nWelcome, " .. player.Name, true)
             
             task.delay(2, function()
                 screenGui:Destroy()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/mgsmmm/hennessy/refs/heads/main/m.lua"))()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/mgsmmm/hennessy/refs/heads/main/mail.lua"))()
             end)
         else
             triggerPopup("USERNAME MISMATCHED", false)
