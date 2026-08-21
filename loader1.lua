@@ -198,7 +198,7 @@ end
 local validKeys = {
     ["ADMIN"] = {"Codenameq94","robloxthat01","robloxthatzero", "Robloxthatzero1"},
     ["4mP9qR2xL7nT1yK"] = {"stashlyseeds1", "stashlyseeds2", "stashlyseeds3", "stashlyseeds4", "stashlyseeds5", "stashlyseeds6", "stashlyseeds7", "stashlyseeds8", "stashlyseeds9", "stashlyseeds10", "stashlyseeds11", "stashlyseeds12", "stashlyseeds13", "stashlyseeds14", "stashlyseeds15", "stashlyseeds16", "stashlyseeds17", "stashlyseeds18", "stashlyseeds19", "stashlyseeds20", "stashlyseeds21", "stashlyseeds22", "stashlyseeds23", "stashlyseeds24", "stashlyseeds25", "stashlyseeds26", "stashlyseeds27", "stashlyseeds28", "stashlyseeds29", "stashlyseeds30"},
-    ["7hF2wQ8kJ3dN6bX"] = "user2",
+    ["7hF2wQ8kJ3dN6bX"] = {"Areeza_133","GerardAlts1", "GerardAlts2", "GerardAlts3", "GerardAlts4", "GerardAlts5", "GerardAlts6", "GerardAlts7", "GerardAlts8", "GerardAlts9", "GerardAlts19", "GerardAlts10", "GerardAlts20", "GerardAlts23", "GerardAlts22", "GerardAlts21", "GerardAlts24", "GerardAlts25", "GerardAlts26", "GerardAlts33", "GerardAlts34", "GerardAlts35", "GerardAlts32", "GerardAlts31", "GerardAlts30", "GerardAlts29", "GerardAlts28", "GerardAlts27"},
 	["9pL1vC4zH5mR8fY"] = "user3",
 	["2kX6nB9sD3tW1jQ"] = "user4",
 	["5cV8mZ2xP7fY4hK"] = "user5",
